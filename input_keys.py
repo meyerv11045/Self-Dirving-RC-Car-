@@ -1,10 +1,18 @@
-import keyboard
-import numpy as np
+''' Vikram Meyer 2/19/2020
+    Script that allows for the collection of steering training data
+    through the PiCamera and keyboard controlling the arduino
+'''
+import cv2 
 from picamera import PiCamera
-from time import sleep
+from picamera.array import PiRGBArray 
+import numpy as np
+from time import sleep 
+import keyboard
+import os
+import serial
 
 RESOLUTION = (640,480)
-FRAMERATE = 32
+FRAMERATE = 30
 
 def get_keys(board):
     ''' Takes arduino board as input
@@ -12,16 +20,39 @@ def get_keys(board):
         and updates the output label 
     '''
     output = np.zeros((5,1))
-    for i,val in enumerate(['f','b','l','r','s']):
+    commands = ['F','B','L','R','S']
+    for i,val in enumerate(['w','s','a','d','t']):
         if keyboard.is_pressed(val):
-            board.write(val.upper())
+            board.write(commands[i])
             output[i] = 1
             return output
+        
+def check_data_dir():
+    ''' Checks if a data directory exists
+        and creates one if it doesn't
+    '''
+    directory ='./data/'
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 def init_camera():
     camera = PiCamera()
-    camera.resolution(RESOLUTION[0],RESOLUTION[1])
-    camera.framerate = 32
+    camera.resolution = RESOLUTION
+    camera.framerate = FRAMERATE
     camera.start_preview()
-    sleep(2) #Camera warm up time
+    sleep(0.1) #Camera warm up time
     return camera
+
+def main():
+    ''' 1. Opens the Serial port
+        2. Captures camera frames & keyboard inputs
+        3. Saves the data files in data directory 
+    '''
+    
+    board_name = ''
+    serial.Serial(board_name,9600)
+    sleep(2)
+
+    
+    
+    

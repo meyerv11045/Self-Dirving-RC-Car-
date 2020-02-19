@@ -1,19 +1,22 @@
+''' Vikram Meyer 2/19/2020
+    Script that tests the PiCameraV2 is working 
+'''
 import cv2
-from picamera.array import PiRGBArray
 from picamera import PiCamera
-import time
+from picamera.array import PiRGBArray
 import numpy as np
+from time import sleep 
 
-DIM = (640,480)
-FPS = 30 
+RESOLUTION = (640,480)
+FRAMERATE = 30 
 
 #Init camera object and raw camera capture object 
 camera = PiCamera()
-camera.resolution = DIM
-camera.framerate = FPS 
-rawCapture = PiRGBArray(camera,size=DIM)
+camera.resolution = RESOLUTION
+camera.framerate = FRAMERATE
+rawCapture = PiRGBArray(camera,size=RESOLUTION)
 
-time.sleep(0.1) #allow camera to warmup
+sleep(0.1) #allow camera to warmup
 
 #capture frames from the camera
 for frame in camera.capture_continuous(rawCapture,format='bgr',use_video_port=True):
