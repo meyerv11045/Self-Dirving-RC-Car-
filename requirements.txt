@@ -1,4 +1,5 @@
 keyboard==0.13.4
 numpy==1.18.1
+picamera=1.13
 pkg-resources==0.0.0
 pyserial==3.4
