@@ -21,10 +21,9 @@ def get_keys(board):
         and updates the output label 
     '''
     output = np.zeros((5,1))
-    commands = ['F','B','L','R','S']
     for i,val in enumerate(['w','s','a','d','t']):
         if is_pressed(val):
-            board.write(commands[i]) #Not sure how this controls Arduino 
+            board.write(val) #Writes the value to serial port on Arduino
             output[i] = 1
             return output
         
