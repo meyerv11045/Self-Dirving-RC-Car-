@@ -1,6 +1,12 @@
-/* Vikram Meyer 4/16/2020
- * Control Code for the L298n motor driver
+/* Vikram Meyer 5/19/2020
+ * Control Code for the L298n motor driver on RC Car
+ * Motor A- left side of car
+ * Motor B- right side of car 
+ * Applying high voltage to pin A1 and B1 make their motors spin CW
+ * Applying high voltage to pin A2 and B2 make their motors spin CCW
  */
+int BAUD_RATE = 9600;
+int FPS_DELAY = 200;
 
 //Motor A pins (enableA = enable mtoor, pinA1 = forward, pinA2 = backward)
 int enableA = 5;
@@ -12,12 +18,7 @@ int enableB = 10;
 int pinB1 = 8;
 int pinB2 = 9;
 
-boolean test = true;
-boolean production = false;
-
-byte input;
-
-int fps_delay = 33; //33 ms in btw commands to account for 30 FPS 
+byte cmd;
 
 void setup() {
   pinMode(enableA,OUTPUT);
@@ -27,154 +28,113 @@ void setup() {
   pinMode(enableB,OUTPUT);
   pinMode(pinB1,OUTPUT);
   pinMode(pinB2,OUTPUT);
-   
-  if (production or test) {
-    Serial.begin(9600);    
-  }
+  enableMotors();
+  Serial.begin(BAUD_RATE);
 }
 
 void loop() {
-  if (test){ test_run();}
-  else if (production){standard_run();}
-  else { Serial.println("Set test or production status");}
-}
-
-void test_run(){
-   delay(2000);
-   
-   Serial.println("Forward");
-   forward(5000);
-   Serial.println("Brake");
-   brake(2000);
-   Serial.println("Backward");
-   backward(5000);
-   Serial.println("Brake");
-   brake(2000);
-   Serial.println("Right");
-   left(1000);
-   Serial.println("Brake");
-   brake(2000);
-   Serial.println("Right");
-   right(1000);
-   Serial.println("Coast");
-   coast(5000);
-}
-
-//Receives input from serial port during normal run when it is connected to RPI's serial port
-void standard_run(){
-  enableMotors();  
-  input = Serial.read();
-  if (input = 'w'){
-    forward(fps_delay);
+  if (Serial.available() > 0){
+    cmd = Serial.read();
+    if (cmd == 'w'){
+      forward(FPS_DELAY);
+    } else if (cmd == 'a') {
+      left(FPS_DELAY);  
+    } else if (cmd == 'd'){
+      right(FPS_DELAY);
+    } else if (cmd == 'q') {
+      coast(FPS_DELAY);
+      disableMotors();
+    } else{
+      coast(FPS_DELAY);
+    }
   }
-  if (input = 's'){
-    backward(fps_delay);
-  }
-  if (input = 'a'){
-    left(fps_delay);
-  }
-  if (input = 'd'){
-    right(fps_delay);
-  }
-  if (input = 'q'){
-    brake(fps_delay);
-  }  
 }
 
 //Define the high-level H-bridge  commands
 void enableMotors(){
-  motorAOn();
-  motorBOn();  
+  rightSideOn();
+  leftSideOn();  
 }
 
 void disableMotors(){
-  motorAOff();
-  motorBOff();
+  rightSideOff();
+  leftSideOff();
 }
 
 void forward(int time){  
-  motorAForward();
-  motorBBackward();
+  rightSideForward();
+  leftSideForward();
+  Serial.println("Forward");
   delay(time);
 }
 
 void backward(int time){
-  motorABackward();
-  motorBBackward();
+  rightSideBackward();
+  leftSideBackward();
   delay(time);
 }
 
 void left(int time){
-  motorABackward();
-  motorBForward();
+  rightSideForward();
   delay(time);
 }
 
 void right(int time){
-  motorAForward();
-  motorBBackward();
+  leftSideForward();
   delay(time);
 }
 
-void brake(int time){
-  motorABrake();
-  motorBBrake();
+void off(int time){
+  rightSideOff();
+  leftSideOff();
   delay(time);
 }
 
 void coast(int time){
-  motorACoast();
-  motorBCoast();
+  rightSideCoast();
+  leftSideCoast();
+  Serial.println("Coasting");
   delay(time);
 }
 
 //Define low-level H-bridge commands
-void motorAOn(){
+void leftSideOn(){
   digitalWrite(enableA,HIGH);  
 }
-void motorBOn(){
+void rightSideOn(){
   digitalWrite(enableB,HIGH);  
 }
 
-void motorAOff(){
+void leftSideOff(){
   digitalWrite(enableA,LOW);
 }
-void motorBOff(){
+void rightSideOff(){
   digitalWrite(enableB,LOW);  
 }
 
-void motorAForward(){
+void leftSideBackward(){
   digitalWrite(pinA1,HIGH);
-  digitalWrite(pinA2, LOW);
+  digitalWrite(pinA2,LOW);
 }
-void motorABackward(){
+void leftSideForward(){
   digitalWrite(pinA1,LOW);
   digitalWrite(pinA2,HIGH);
 }
 
-void motorBForward(){
+void rightSideBackward(){
   digitalWrite(pinB1,HIGH);
   digitalWrite(pinB2,LOW);
 }
-void motorBBackward(){
+void rightSideForward(){
   digitalWrite(pinB1,LOW);
   digitalWrite(pinB2,HIGH);
 }
 
-void motorACoast(){
+void leftSideCoast(){
   digitalWrite(pinA1,LOW);
   digitalWrite(pinA2,LOW);  
 }
-void motorBCoast(){
+void rightSideCoast(){
   digitalWrite(pinB1,LOW);
-  digitalWrite(pinB2,LOW);
-}
-
-void motorABrake(){
-  digitalWrite(pinA1,HIGH);
-  digitalWrite(pinA2,HIGH);  
-}
-void motorBBrake(){
-  digitalWrite(pinB1,HIGH);
-  digitalWrite(pinB2,HIGH);  
+  digitalWrite(pinB2,LOW);  
 }
