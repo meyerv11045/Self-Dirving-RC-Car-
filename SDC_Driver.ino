@@ -44,6 +44,8 @@ void loop() {
     } else if (cmd == 'q') {
       coast(FPS_DELAY);
       disableMotors();
+    } else if (cmd == 'e'){
+      enableMotors();
     } else{
       coast(FPS_DELAY);
     }
@@ -54,11 +56,13 @@ void loop() {
 void enableMotors(){
   rightSideOn();
   leftSideOn();  
+  Serial.println("Motors Enabled");
 }
 
 void disableMotors(){
   rightSideOff();
   leftSideOff();
+  Serial.println("Motors Disabled");
 }
 
 void forward(int time){  
@@ -71,22 +75,19 @@ void forward(int time){
 void backward(int time){
   rightSideBackward();
   leftSideBackward();
+  Serial.println("Backward");
   delay(time);
 }
 
 void left(int time){
   rightSideForward();
+  Serial.println("Left");
   delay(time);
 }
 
 void right(int time){
   leftSideForward();
-  delay(time);
-}
-
-void off(int time){
-  rightSideOff();
-  leftSideOff();
+  Serial.println("Right");
   delay(time);
 }
 
